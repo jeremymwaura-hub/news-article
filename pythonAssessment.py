@@ -1,17 +1,14 @@
 #!/usr/bin/env python3
-# """pythonAssessment.py
+"""
+pythonAssessment.py
 
-# Text analysis utilities for news article content.
+Simple text analysis project created as a learning exercise by a Moringa School student.
 
-# Implements:
-# - count_specific_word(text, word)
-# - identify_most_common_word(text)
-# - calculate_average_word_length(text)
-# - count_paragraphs(text)
-# - count_sentences(text)
+This file contains basic functions to analyze a news article text. It is written
+in a simpler style with extra comments so a beginner can follow along.
 
-# Also provides an interactive menu demonstrating usage.
-# """
+Student: Moringa School - Python Basics
+"""
 
 from collections import Counter
 from pathlib import Path
@@ -19,25 +16,25 @@ import re
 import sys
 
 
-def count_specific_word(text: str, search_word: str) -> int:
-    """Count whole-word, case-insensitive occurrences of search_word in text.
+def count_specific_word(text, search_word):
+    """Count how many times search_word appears as a whole word (case-insensitive).
 
-    Returns 0 if no matches or if either argument is empty.
+    Returns 0 if nothing is found or inputs are empty.
     """
+    # simple checks
     if not text or not search_word:
         return 0
+    # use word boundary so we don't count substrings
     pattern = r"\b" + re.escape(search_word) + r"\b"
     matches = re.findall(pattern, text, flags=re.IGNORECASE)
     return len(matches)
 
 
-def identify_most_common_word(text: str) -> str | None:
-    """Return the most common word (lowercased) or None for empty input.
-
-    Words are sequences of letters and apostrophes. Punctuation is ignored.
-    """
+def identify_most_common_word(text):
+    """Return the most common word in the text, or None if text is empty."""
     if not text or not text.strip():
         return None
+    # find words made of letters and apostrophes
     words = re.findall(r"[A-Za-z']+", text.lower())
     if not words:
         return None
@@ -46,53 +43,49 @@ def identify_most_common_word(text: str) -> str | None:
     return most_common_word
 
 
-def calculate_average_word_length(text: str) -> float:
-    """Calculate average word length, excluding punctuation.
+def calculate_average_word_length(text):
+    """Calculate average length of words ignoring punctuation.
 
-    Returns 0.0 for empty input.
+    Return 0.0 for empty text.
     """
     if not text or not text.strip():
         return 0.0
     words = re.findall(r"[A-Za-z']+", text)
     if not words:
         return 0.0
-    total_len = sum(len(w.replace("'", '')) for w in words)
+    # remove apostrophes from length count
+    total_len = 0
+    for w in words:
+        total_len += len(w.replace("'", ""))
     return total_len / len(words)
 
 
-def count_paragraphs(text: str) -> int:
-    """Count paragraphs defined by one or more empty lines between blocks.
+def count_paragraphs(text):
+    """Count paragraphs separated by empty lines.
 
-    Edge case: empty string should return 1.
+    If text is empty, return 1 (as per assignment requirement).
     """
     if text is None or text == "":
         return 1
-    # Split on two or more newlines (with optional whitespace)
     blocks = re.split(r"\n\s*\n+", text.strip())
-    # Filter out any empty blocks
     blocks = [b for b in blocks if b.strip()]
     return max(1, len(blocks))
 
 
-def count_sentences(text: str) -> int:
-    """Count sentences based on terminal punctuation (., !, ?).
+def count_sentences(text):
+    """Count sentences by splitting on . ! or ? followed by whitespace.
 
-    Edge case: empty string should return 1.
+    If text is empty, return 1.
     """
     if text is None or text == "":
         return 1
-    # Split on sentence enders followed by whitespace (keep abbreviations simple)
     parts = re.split(r'(?<=[.!?])\s+', text.strip())
-    # Filter out very short fragments
     sentences = [p for p in parts if re.search(r'[A-Za-z0-9]', p)]
     return max(1, len(sentences))
 
 
-def read_article_from_candidates() -> str:
-    """Try common file locations for a provided article, else ask user.
-
-    Returns the article text as a string. If no file found, returns an empty string.
-    """
+def read_article_from_candidates():
+    """Try to read a file from common names, else ask user or use sample."""
     candidates = [
         Path("news_article.txt"),
         Path("article.txt"),
@@ -105,15 +98,13 @@ def read_article_from_candidates() -> str:
                 return p.read_text(encoding="utf-8")
         except Exception:
             continue
-    # No candidate found — try asking user for path (non-interactive tests can skip)
     print("No article file found in common locations.")
     user_path = input("Enter path to news article file (or press Enter to use sample): ").strip()
     if user_path:
         try:
             return Path(user_path).read_text(encoding="utf-8")
         except Exception as e:
-            print(f"Couldn't read file: {e}")
-    # Return sample placeholder text
+            print("Couldn't read file:", e)
     sample = (
         "Breaking News: Local developer writes text-analysis script.\n\n"
         "This is a short sample article used when no file is provided.\n"
@@ -123,28 +114,28 @@ def read_article_from_candidates() -> str:
 
 
 def main():
+    # read article text
     article_text = read_article_from_candidates()
 
-    # Demonstrate the functions with example outputs
     print("\n--- Article Analysis Summary ---\n")
     most_common = identify_most_common_word(article_text)
     avg_len = calculate_average_word_length(article_text)
     para_count = count_paragraphs(article_text)
     sent_count = count_sentences(article_text)
 
-    print(f"Most common word: {most_common}")
-    print(f"Average word length: {avg_len:.2f}")
-    print(f"Paragraphs: {para_count}")
-    print(f"Sentences: {sent_count}")
+    print("Most common word:", most_common)
+    print("Average word length:", f"{avg_len:.2f}")
+    print("Paragraphs:", para_count)
+    print("Sentences:", sent_count)
 
-    # Show top 10 words using a for loop
+    # show top words (simple for loop)
     words = re.findall(r"[A-Za-z']+", article_text.lower())
     freq = Counter(words)
     print("\nTop words:")
     for i, (w, c) in enumerate(freq.most_common(10), start=1):
-        print(f"{i}. {w} — {c}")
+        print(i, w, "-", c)
 
-    # Interactive menu demonstrating while loop and conditional logic
+    # simple interactive menu using while and if/else
     while True:
         print("\nOptions: [1] Count specific word  [2] Re-analyze  [3] Exit")
         choice = input("Choose an option: ").strip()
@@ -152,13 +143,12 @@ def main():
             word = input("Enter word to count: ").strip()
             count = count_specific_word(article_text, word)
             if count:
-                print(f"The word '{word}' appears {count} times.")
+                print("The word '", word, "' appears", count, "times.")
             else:
-                print(f"The word '{word}' was not found.")
+                print("The word '", word, "' was not found.")
         elif choice == "2":
-            # Recompute and show a short summary
             most_common = identify_most_common_word(article_text)
-            print(f"Most common word: {most_common}")
+            print("Most common word:", most_common)
         elif choice == "3" or choice.lower() in ("q", "quit", "exit"):
             print("Exiting analysis.")
             break
