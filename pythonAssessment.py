@@ -1,132 +1,80 @@
 from collections import Counter
-from pathlib import Path
 import re
-import sys
 
 
-def count_specific_word(text, search_word):
-    """Count how many times search_word appears as a whole word (case-insensitive).
-
-    Returns 0 if nothing is found or inputs are empty.
-    """
-    # simple checks
-    if not text or not search_word:
-        return 0
-    # use word boundary so we don't count substrings
-    pattern = r"\b" + re.escape(search_word) + r"\b"
-    matches = re.findall(pattern, text, flags=re.IGNORECASE)
-    return len(matches)
-
-
-def identify_most_common_word(text):
-    """Return the most common word in the text, or None if text is empty."""
-    if not text or not text.strip():
-        return None
-    # find words made of letters and apostrophes
+def most_common_word(text):
     words = re.findall(r"[A-Za-z']+", text.lower())
+
     if not words:
-        return None
+        return "No words found"
+
     counter = Counter(words)
-    most_common_word, _ = counter.most_common(1)[0]
-    return most_common_word
+    return counter.most_common(1)[0]
 
 
-def calculate_average_word_length(text):
-    """Calculate average length of words ignoring punctuation.
-
-    Return 0.0 for empty text.
-    """
-    if not text or not text.strip():
-        return 0.0
+def average_word_length(text):
     words = re.findall(r"[A-Za-z']+", text)
+
     if not words:
-        return 0.0
-    # remove apostrophes from length count
-    total_len = 0
-    for w in words:
-        total_len += len(w.replace("'", ""))
-    return total_len / len(words)
+        return 0
+
+    total = 0
+
+    for word in words:
+        total += len(word)
+
+    return total / len(words)
 
 
 def count_paragraphs(text):
-    """Count paragraphs separated by empty lines.
-
-    If text is empty, return 1 (as per assignment requirement).
-    """
-    if text is None or text == "":
-        return 1
-    blocks = re.split(r"\n\s*\n+", text.strip())
-    blocks = [b for b in blocks if b.strip()]
-    return max(1, len(blocks))
+    paragraphs = text.strip().split("\n\n")
+    return len(paragraphs)
 
 
 def count_sentences(text):
-    """Count sentences by splitting on . ! or ? followed by whitespace.
-
-    If text is empty, return 1.
-    """
-    if text is None or text == "":
-        return 1
-    parts = re.split(r'(?<=[.!?])\s+', text.strip())
-    sentences = [p for p in parts if re.search(r'[A-Za-z0-9]', p)]
-    return max(1, len(sentences))
+    sentences = re.findall(r"[.!?]", text)
+    return len(sentences)
 
 
-def read_article_from_candidates():
-    """Read article.txt from the same folder as this script."""
-    try:
-        article_path = Path(__file__).with_name("article.txt")
-        return article_path.read_text(encoding="utf-8")
-    except FileNotFoundError:
-        print("Error: article.txt was not found.")
-        sys.exit(1)
-
-def main():
-    # read article text
-    article_text = read_article_from_candidates()
-
-    print("\n--- Article Analysis Summary ---\n")
-    most_common = identify_most_common_word(article_text)
-    avg_len = calculate_average_word_length(article_text)
-    para_count = count_paragraphs(article_text)
-    sent_count = count_sentences(article_text)
-
-    print("Most common word:", most_common)
-    print("Average word length:", f"{avg_len:.2f}")
-    print("Paragraphs:", para_count)
-    print("Sentences:", sent_count)
-
-    # show top words (simple for loop)
-    words = re.findall(r"[A-Za-z']+", article_text.lower())
-    freq = Counter(words)
-    print("\nTop words:")
-    for i, (w, c) in enumerate(freq.most_common(10), start=1):
-        print(i, w, "-", c)
-
-    # simple interactive menu using while and if/else
-    while True:
-        print("\nOptions: [1] Count specific word  [2] Re-analyze  [3] Exit")
-        choice = input("Choose an option: ").strip()
-        if choice == "1":
-            word = input("Enter word to count: ").strip()
-            count = count_specific_word(article_text, word)
-            if count:
-                print("The word '", word, "' appears", count, "times.")
-            else:
-                print("The word '", word, "' was not found.")
-        elif choice == "2":
-            most_common = identify_most_common_word(article_text)
-            print("Most common word:", most_common)
-        elif choice == "3" or choice.lower() in ("q", "quit", "exit"):
-            print("Exiting analysis.")
-            break
-        else:
-            print("Invalid option — please choose 1, 2, or 3.")
+def count_word(text, search_word):
+    words = re.findall(r"[A-Za-z']+", text.lower())
+    return words.count(search_word.lower())
 
 
-if __name__ == "__main__":
-    try:
-        main()
-    except KeyboardInterrupt:
-        print("\nInterrupted by user. Exiting.")
-        sys.exit(0)
+# Read article file
+with open("article.txt", "r", encoding="utf-8") as file:
+    article = file.read()
+
+# Analysis
+print("\n--- ARTICLE ANALYSIS ---")
+
+print("Most common word:", most_common_word(article))
+print("Average word length:", round(average_word_length(article), 2))
+print("Paragraphs:", count_paragraphs(article))
+print("Sentences:", count_sentences(article))
+
+# Top 10 words
+words = re.findall(r"[A-Za-z']+", article.lower())
+counter = Counter(words)
+
+print("\nTop 10 Words:")
+for word, count in counter.most_common(10):
+    print(word, "-", count)
+
+# Menu
+while True:
+    print("\n1. Count a specific word")
+    print("2. Exit")
+
+    choice = input("Choose an option: ")
+
+    if choice == "1":
+        word = input("Enter a word: ")
+        print("Occurrences:", count_word(article, word))
+
+    elif choice == "2":
+        print("Goodbye!")
+        break
+
+    else:
+        print("Invalid choice.")
