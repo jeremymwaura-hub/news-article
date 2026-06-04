@@ -1,15 +1,3 @@
-#!/usr/bin/env python3
-"""
-pythonAssessment.py
-
-Simple text analysis project created as a learning exercise by a Moringa School student.
-
-This file contains basic functions to analyze a news article text. It is written
-in a simpler style with extra comments so a beginner can follow along.
-
-Student: Moringa School - Python Basics
-"""
-
 from collections import Counter
 from pathlib import Path
 import re
