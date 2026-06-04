@@ -73,33 +73,13 @@ def count_sentences(text):
 
 
 def read_article_from_candidates():
-    """Try to read a file from common names, else ask user or use sample."""
-    candidates = [
-        Path("news_article.txt"),
-        Path("article.txt"),
-        Path("news-article/article.txt"),
-        Path(__file__).with_name("article.txt"),
-    ]
-    for p in candidates:
-        try:
-            if p.exists():
-                return p.read_text(encoding="utf-8")
-        except Exception:
-            continue
-    print("No article file found in common locations.")
-    user_path = input("Enter path to news article file (or press Enter to use sample): ").strip()
-    if user_path:
-        try:
-            return Path(user_path).read_text(encoding="utf-8")
-        except Exception as e:
-            print("Couldn't read file:", e)
-    sample = (
-        "Breaking News: Local developer writes text-analysis script.\n\n"
-        "This is a short sample article used when no file is provided.\n"
-        "It includes multiple sentences. Does it count sentences correctly? Yes!"
-    )
-    return sample
-
+    """Read article.txt from the same folder as this script."""
+    try:
+        article_path = Path(__file__).with_name("article.txt")
+        return article_path.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        print("Error: article.txt was not found.")
+        sys.exit(1)
 
 def main():
     # read article text
