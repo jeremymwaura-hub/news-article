@@ -9,7 +9,7 @@ def most_common_word(text):
         return "No words found"
 
     counter = Counter(words)
-    return counter.most_common(1)[0]
+    return counter.most_common(1)[0][0]
 
 
 def average_word_length(text):
